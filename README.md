@@ -33,4 +33,4 @@ biom.df = formatColoc(fname = "CAD_sumstats.txt", type="cc", N=100000, Ncases=30
 eqtl.df = formatColoc(fname = "Adipose.txt", type="quant", N=400, Ncases=NA, info_filter=0.6, maf_filter=0.05, fread=T, eqtl=TRUE)
 
 res = coloc.eqtl.biom(eqtl.df=eqtl.df, biom.df=biom.df, p12=p12, useBETA=TRUE, outfolder="results/", prefix="CAD_Adipose", plot=FALSE, save.coloc.output=FALSE, match_snpid=T)
-```
+

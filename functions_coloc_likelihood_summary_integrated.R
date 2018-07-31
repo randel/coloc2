@@ -4,7 +4,7 @@
 library(foreach)
 library(doParallel)
 library(GenomicRanges)
-library(rtracklayer)
+# library(rtracklayer)
 library(data.table)
 
 Var.data <- function(f, N) {

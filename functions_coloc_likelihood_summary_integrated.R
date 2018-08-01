@@ -422,7 +422,8 @@ if (plot) {
   rsq_filter = 0.6 #Imputation quality filter applied to datasets
 
 ###
-if (unique(biom.df$type) == "cc") cc=TRUE else cc=FALSE
+#if (unique(biom.df$type) == "cc") cc=TRUE else cc=FALSE
+	cc=TRUE
 
 maf.eqtl = ifelse("MAF" %in% names(eqtl.df), TRUE, FALSE)
 maf.biom = ifelse("MAF" %in% names(biom.df), TRUE, FALSE)
@@ -949,7 +950,8 @@ if (plot) {
   rsq_filter = 0.6 #Imputation quality filter applied to datasets
 
 ###
-if (unique(biom.df$type) == "cc") cc=TRUE else cc=FALSE
+# if (unique(biom.df$type) == "cc") cc=TRUE else cc=FALSE
+	cc=TRUE
 #if (all(c("CHR", "POS") %in% names(biom.df))) haveCHRPOS.biom=TRUE else haveCHRPOS.biom=FALSE
 #if (all(c("CHR", "POS") %in% names(eqtl.df))) haveCHRPOS.eqtl=TRUE else haveCHRPOS.eqtl=FALSE
 maf.eqtl = ifelse("MAF" %in% names(eqtl.df), TRUE, FALSE)

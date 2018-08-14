@@ -159,8 +159,8 @@ remove_dupl_eqtl.data.table <- function(data=data, byCols=c("ProbeID", "SNP")) {
             eqtl.ranges = GRanges(seqnames=eqtl.df$CHR,IRanges(start=eqtl.df$POS,end=eqtl.df$POS))
 
             merged.overlaps = findOverlaps(eqtl.ranges,bed.ranges, type="any")
-            s = min(eqtl.df[merged.overlaps@queryHits,"POS"])
-            e = max(eqtl.df[merged.overlaps@queryHits,"POS"])
+            s = min(eqtl.df[merged.overlaps@from,"POS"])
+            e = max(eqtl.df[merged.overlaps@from,"POS"])
             # if there are any genes at the border include
             if (s<start) {
                message("Extending the start")

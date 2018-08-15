@@ -396,7 +396,7 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
   if (class(eqtl.df$ProbeID)!="character") stop("When reading the data frame, make sure class of ProbeID in eQTL data is a character")
 
 #  source("/sc/orga/projects/psychgen/resources/COLOC2/COLOC_scripts/scripts/optim_function.R")
-  print(head(eqtl.df))
+  #print(head(eqtl.df))
   print(head(biom.df))
   eqtl.df.rs = eqtl.df[grep("rs",eqtl.df$SNPID),]
   print(head(eqtl.df.rs)) 
@@ -632,7 +632,7 @@ registerDoParallel(cores=cores)
 list.probes = bed$ProbeID
 print(class(eqtl.df))
 eqtl.dfByProbe = split(seq(nrow(eqtl.df)), eqtl.df$ProbeID)
-print(head(eqtl.df))
+#print(head(eqtl.df))
 print(length(eqtl.dfByProbe[[1]]))
 print("eqtl.df rows")
 #print(head(eqtl.df$ProbeID))

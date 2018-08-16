@@ -817,13 +817,13 @@ sniff <- function(file=fname, eqtl = FALSE) {
     }
   }
   print(names(line))
-  A1 = which(grepl("A1|Allele1", names(line),ignore.case=T))
-  A2 = which(grepl("A2|Allele2", names(line),ignore.case=T))
+  A1 = which(grepl("A1|Allele1|ref", names(line),ignore.case=T))
+  A2 = which(grepl("A2|Allele2|alt", names(line),ignore.case=T))
   if(length(A1) ==0 || length(A2)== 0){
     message("Could not find columns representing A1 and A2, continuing anyway")
   }
   if (eqtl) {
-    ProbeID = which(grepl("ProbeID", names(line),  ignore.case = T))
+    ProbeID = which(grepl("ProbeID|gene", names(line),  ignore.case = T))
     if (length(ProbeID)==0) stop("Column ProbeID is missing")
   }
   # If there is no "chr" column see if I can extract it from the SNP name (only if all SNP names contain chr info)

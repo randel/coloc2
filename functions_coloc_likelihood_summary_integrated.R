@@ -802,7 +802,7 @@ sniff <- function(file=fname, eqtl = FALSE) {
   BETA = which(grepl("^beta$|^b$|^effect$|^or$|OR.A1|BMIadjMainEffects", names(line),  ignore.case = T))
   F = which(grepl("^F$|freq|FRQ|MAF", names(line),  ignore.case = T))[1] # sometimes have 2 (one for each allele), doesn't matter whcih you take for our applications (fGWAS and coloc)
   if (is.na(F)) F=integer(0)
-  PVAL = which(grepl("^p$|pval|Pvalue|P.value|P.val|BMIadjMainP", names(line),  ignore.case = T))[1]
+  PVAL = which(grepl("^p$|pval|Pvalue|P.value|P.val|BMIadjMainP|p-value", names(line),  ignore.case = T))[1]
   SE = which(grepl("^se|^StdErr$|BMIadjMainSE", names(line),  ignore.case = T))
 
   if (length(PVAL)>0) {

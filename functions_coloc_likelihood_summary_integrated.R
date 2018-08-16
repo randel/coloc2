@@ -843,7 +843,7 @@ sniff <- function(file=fname, eqtl = FALSE) {
   Ncontrols =  which(grepl("^N_CONTROLS$|^N_CONTROL$|^Ncontrols$", names(line),  ignore.case = T))
 
   info = which(grepl("INFO|RSQ", names(line),  ignore.case = T))
-  Z = which(grepl("^Z$|zscore", names(line),  ignore.case = T))
+  Z = which(grepl("^Z$|zscore|t-stat", names(line),  ignore.case = T))
 
   ### Sanity checks
   if (length(PVAL)>0) if ( sum(line[,PVAL] <0 | line[,PVAL]>1) >0 ) message("Invalid Pvalues")

@@ -798,7 +798,7 @@ sniff <- function(file=fname, eqtl = FALSE) {
   }
   SNPID = which(grepl("snp|SNP|MarkerName", names(line),  ignore.case = T))
   CHR = which(grepl("^CHROM$|^chr$|^chr.x$|^CHR$|^Chromosome$|^chr_name$", names(line),  ignore.case = T))
-  POS = which(grepl("^pos$|^bp$|^bp_hg19$|^position|^chrom_start$", names(line),  ignore.case = T))
+  POS = which(grepl("^pos$|^bp$|^bp_hg19$|^position|^chrom_start$|variant_pos", names(line),  ignore.case = T))
   BETA = which(grepl("^beta$|^b$|^effect$|^or$|OR.A1|BMIadjMainEffects", names(line),  ignore.case = T))
   F = which(grepl("^F$|freq|FRQ|MAF", names(line),  ignore.case = T))[1] # sometimes have 2 (one for each allele), doesn't matter whcih you take for our applications (fGWAS and coloc)
   if (is.na(F)) F=integer(0)

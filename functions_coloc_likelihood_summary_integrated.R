@@ -35,7 +35,7 @@ logdiff <- function(x,y) {
 
 
 process.dataset <- function(d, suffix, ave=TRUE, estimate_sdy=TRUE,correlation=0) {
-  message('Processing dataset')
+  # message('Processing dataset')
 
   nd <- names(d)
   if (! 'type' %in% nd)
@@ -58,10 +58,10 @@ process.dataset <- function(d, suffix, ave=TRUE, estimate_sdy=TRUE,correlation=0
         }
       }
     }
-    print("SdY")
-    print(d$sdY)
+    # print("SdY")
+    # print(d$sdY)
     d$sdY = 1
-    print(d$sdY)
+    # print(d$sdY)
     if(correlation != 0){
       df = data.frame(Z,V,sdy)
       df$Z=d$beta/sqrt(d$varbeta)
@@ -275,7 +275,7 @@ remove_dupl = function(data) {
     toremove = rownames(dupl[ !duplicated(dupl$SNP), ])
     removed_list <- data.frame(Marker_removed = dupl$SNP[!duplicated(dupl$SNP)], reason = "Duplicated SNPs")
     data = data[!(rownames(data) %in% toremove),]
-    message("Removed ", length(toremove), " duplicated SNP names")
+    # message("Removed ", length(toremove), " duplicated SNP names")
   }  else {
     removed_list <- data.frame(Marker_removed = NA, reason = "Duplicated SNPs")
   }
@@ -620,20 +620,20 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
 
       snp_allele_match = match_flip | match_correct | match_comp_one | match_comp_two
       # print(merged.data[!snp_allele_match,])
-      message(sum(snp_allele_match), " SNPs out of ", length(snp_allele_match), " had the correct alleles, discarding SNPs without the correct alleles")
+      # message(sum(snp_allele_match), " SNPs out of ", length(snp_allele_match), " had the correct alleles, discarding SNPs without the correct alleles")
       merged.data = merged.data[snp_allele_match,]
     }
     if (!useBETA) merged.data = merged.data[merged.data$PVAL.biom>0 & merged.data$PVAL.eqtl>0,]
     n_occur <- data.frame(table(merged.data$SNPID))
     dupl = merged.data[merged.data$SNPID %in% n_occur$Var1[n_occur$Freq > 1],]
-    message("There are ", nrow(dupl)/2, " duplicated SNP names in the data")
+    # message("There are ", nrow(dupl)/2, " duplicated SNP names in the data")
     if (nrow(dupl)>0) {
       dupl=dupl[order(dupl$MAF.eqtl, decreasing=T),]
       toremove = rownames(dupl[ !duplicated(dupl$SNPID), ])
       merged.data = merged.data[!(rownames(merged.data) %in% toremove),]
     }
     nsnps = nrow(merged.data)
-    message(ProbeID, ": ", nsnps, " snps in both biomarker and eQTL data. From: ", pos.start, " To: ", pos.end)
+    # message(ProbeID, ": ", nsnps, " snps in both biomarker and eQTL data. From: ", pos.start, " To: ", pos.end)
     if (nsnps <= min_snps ) {
       message("There are not enough shared snps in the region")
       next

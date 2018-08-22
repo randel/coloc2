@@ -570,8 +570,8 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
   # print(class(eqtl.df))
   eqtl.dfByProbe = split(seq(nrow(eqtl.df)), eqtl.df$ProbeID)
   #print(head(eqtl.df))
-  print(length(eqtl.dfByProbe[[1]]))
-  print("eqtl.df rows")
+  # print(length(eqtl.dfByProbe[[1]]))
+  # print("eqtl.df rows")
   #print(head(eqtl.df$ProbeID))
   if(!is.null(bed_input_file)){
     message("Reading LD independent bed file")
@@ -688,7 +688,7 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
         lH3.abf <- logdiff(logsum(l1) + logsum(l2), logsum(lsum))  - log(nsnps^2)
         lH4.abf <- logsum(lsum) -log(nsnps)
         all.abf <- c(lH0.abf, lH1.abf, lH2.abf, lH3.abf, lH4.abf)
-        message(unique(merged.data$bed_region))
+        # message(unique(merged.data$bed_region))
         res.temp = data.frame(ProbeID = ProbeID, Chr = chrom, pos.start=pos.start, pos.end=pos.end, nsnps = nsnps, snp.biom=snp.biom, snp.eqtl=snp.eqtl, min.pval.biom=min.pval.biom, min.pval.eqtl=min.pval.eqtl, best.causal=best.causal, PP0.coloc.priors=pp0, PP1.coloc.priors=pp1, PP2.coloc.priors=pp2, PP3.coloc.priors = pp3, PP4.coloc.priors=pp4, lH0.abf=lH0.abf, lH1.abf=lH1.abf, lH2.abf=lH2.abf, lH3.abf=lH3.abf, lH4.abf=lH4.abf, plotFiles=NA, files=NA, bed_region=unique(merged.data$bed_region))
         
         

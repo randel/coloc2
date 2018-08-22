@@ -346,9 +346,9 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
 
   #  source("/sc/orga/projects/psychgen/resources/COLOC2/COLOC_scripts/scripts/optim_function.R")
   #print(head(eqtl.df))
-  print(head(biom.df))
+  # print(head(biom.df))
   eqtl.df.rs = eqtl.df[grep("rs",eqtl.df$SNPID),]
-  print(head(eqtl.df.rs))
+  # print(head(eqtl.df.rs))
 
   # Estimate trait variance.
 
@@ -635,7 +635,7 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
     nsnps = nrow(merged.data)
     # message(ProbeID, ": ", nsnps, " snps in both biomarker and eQTL data. From: ", pos.start, " To: ", pos.end)
     if (nsnps <= min_snps ) {
-      message("There are not enough shared snps in the region")
+      # message("There are not enough shared snps in the region")
       next
     }else{
       if(!is.null(bed)){

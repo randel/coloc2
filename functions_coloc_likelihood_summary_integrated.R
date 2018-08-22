@@ -36,11 +36,11 @@ logdiff <- function(x,y) {
 
 process.dataset <- function(d, suffix, ave=TRUE, estimate_sdy=TRUE,correlation=0) {
   # message('Processing dataset')
-
+  
   nd <- names(d)
   if (! 'type' %in% nd)
     stop('The variable type must be set, otherwise the Bayes factors cannot be computed')
-
+  
   if("beta" %in% nd && "varbeta" %in% nd && ("MAF" %in% nd || "sdY" %in% nd)) {
     if(length(d$beta) != length(d$varbeta))
       stop("Length of the beta vectors and variance vectors must match")
@@ -52,7 +52,7 @@ process.dataset <- function(d, suffix, ave=TRUE, estimate_sdy=TRUE,correlation=0
       if(d$type == 'quant' & !('sdY' %in% nd)){
         if("N" %in% nd){
           d$sdY <- sdY.est(d$varbeta, d$MAF, d$N,d$beta)
-          print(d$sdY)
+          # print(d$sdY)
         }else{
           d$sdY  <- 1
         }
@@ -76,7 +76,7 @@ process.dataset <- function(d, suffix, ave=TRUE, estimate_sdy=TRUE,correlation=0
     if(d$type == "cc"){
       if (length(d$beta[d$beta<0])==0) d$beta = log(d$beta)
     }
-
+    
     if (d$type == "quant") {
       if(!ave) {
         df <- approx.bf.estimates(z=d$beta/sqrt(d$varbeta),
@@ -98,7 +98,7 @@ process.dataset <- function(d, suffix, ave=TRUE, estimate_sdy=TRUE,correlation=0
     df$snp <- as.character(d$snp)
     return(df)
   }
-
+  
   if("pvalues" %in% nd & "MAF" %in% nd & "N" %in% nd) {
     if (length(d$pvalues) != length(d$MAF))
       stop('Length of the P-value vectors and MAF vector must match')
@@ -119,7 +119,7 @@ process.dataset <- function(d, suffix, ave=TRUE, estimate_sdy=TRUE,correlation=0
     df <- cbind(df, abf)
     return(df)
   }
-
+  
   stop("Must give, as a minimum, either (beta, varbeta, type) or (pvalues, MAF, N, type)")
 }
 
@@ -132,16 +132,16 @@ coloc.abf <- function(dataset1, dataset2, MAF=NULL,
     dataset1$MAF <- MAF
   if(!("MAF" %in% names(dataset2)) & !is.null(MAF))
     dataset2$MAF <- MAF
-
-
+  
+  
   df1 <- process.dataset(d=dataset1, suffix="df1", ave=FALSE,correlation=correlation)
   df2 <- process.dataset(d=dataset2, suffix="df2", ave=TRUE,correlation=correlation)
   merged.df <- merge(df1,df2)
-
-
+  
+  
   if(!nrow(merged.df))
     stop("dataset1 and dataset2 should contain the same snps in the same order, or should contain snp names through which the common snps can be identified")
-
+  
   # if there are no columns with lABF computed from different sds, internal sum is just simple sum of lABF:
   if(correlation != 0){
     merged.df$approx.bf.estimates.ave(d$Z.df1,d$V.df1,d$Z.df2,d$V.df2,d$sdY.df1,d$sdY.df2)
@@ -151,21 +151,21 @@ coloc.abf <- function(dataset1, dataset2, MAF=NULL,
     } else {
       merged.df$lABF_ave.df1 = apply(cbind(merged.df$lABF_sd1.df1, merged.df$lABF_sd2.df1, merged.df$lABF_sd3.df1),1, function(x) logsum(sum(x)) - log(3))
       merged.df$lABF_ave.df2 = apply(cbind(merged.df$lABF_sd1.df2, merged.df$lABF_sd2.df2, merged.df$lABF_sd3.df2),1, function(x) logsum(sum(x)) - log(3))
-
+      
       merged.df$internal.sum.lABF <- apply(cbind(merged.df$lABF_sd1.df1 + merged.df$lABF_sd1.df2, merged.df$lABF_sd2.df1 + merged.df$lABF_sd2.df2, merged.df$lABF_sd3.df1 + merged.df$lABF_sd3.df2), 1, function(x) logsum(x) - log(3))
     }
   }
-
-
+  
+  
   my.denom.log.abf <- logsum(merged.df$internal.sum.lABF)
   merged.df$SNP.PP.H4 <- exp(merged.df$internal.sum.lABF - my.denom.log.abf)
-
+  
   ##############################
-
+  
   pp.abf <- combine.abf(merged.df$lABF.df1, merged.df$lABF.df2, p1, p2, p12)
   common.snps <- nrow(merged.df)
   results <- c(nsnps=common.snps, pp.abf)
-
+  
   output<-list(summary=results, results=merged.df)
   return(output)
 }
@@ -283,13 +283,13 @@ remove_dupl = function(data) {
 }
 
 combine.abf.locus <- function(l0, l1, l2, l3, l4, a0, a1, a2, a3, a4) {
-
+  
   lH0.abf  <- log(a0) + l0
   lH1.abf  <- log(a1) + l1
   lH2.abf  <- log(a2) + l2
   lH3.abf  <- log(a3) + l3
   lH4.abf  <- log(a4) + l4
-
+  
   all.abf <- c(lH0.abf, lH1.abf, lH2.abf, lH3.abf, lH4.abf)
   my.denom.log.abf <- logsum(all.abf)
   pp.abf <- exp(all.abf - my.denom.log.abf)
@@ -306,7 +306,7 @@ combine.abf <- function(l1, l2, p1, p2, p12) {
   lH2.abf <- log(p2) + logsum(l2)
   lH3.abf <- log(p1) + log(p2) + logdiff(logsum(l1) + logsum(l2), logsum(lsum))
   lH4.abf <- log(p12) + logsum(lsum)
-
+  
   all.abf <- c(lH0.abf, lH1.abf, lH2.abf, lH3.abf, lH4.abf)
   my.denom.log.abf <- logsum(all.abf)
   pp.abf <- exp(all.abf - my.denom.log.abf)
@@ -343,30 +343,30 @@ fn.pw.gwas = function(p, data) {
 
 coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE, outfolder, prefix= "pref", save.coloc.output=FALSE, match_snpid=TRUE,cores=20,bootstrap=F,no_bootstraps=1000, min_snps=50, bed_input_file=NULL){
   if (class(eqtl.df$ProbeID)!="character") stop("When reading the data frame, make sure class of ProbeID in eQTL data is a character")
-
+  
   #  source("/sc/orga/projects/psychgen/resources/COLOC2/COLOC_scripts/scripts/optim_function.R")
   #print(head(eqtl.df))
   # print(head(biom.df))
   eqtl.df.rs = eqtl.df[grep("rs",eqtl.df$SNPID),]
   # print(head(eqtl.df.rs))
-
+  
   # Estimate trait variance.
-
+  
   if (!file.exists(outfolder)) dir.create(outfolder)
-
+  
   # Set Variables
   maf_filter = 0.001 #MAF filter applied to datasets
   rsq_filter = 0.6 #Imputation quality filter applied to datasets
-
+  
   ###
   #if (unique(biom.df$type) == "cc") cc=TRUE else cc=FALSE
   cc=TRUE
-
+  
   maf.eqtl = ifelse("MAF" %in% names(eqtl.df), TRUE, FALSE)
   maf.biom = ifelse("MAF" %in% names(biom.df), TRUE, FALSE)
   if (!maf.eqtl & !maf.biom) message("There is no MAF information in either datasets, looking for frequency column")
-
-
+  
+  
   if (useBETA) {
     cols.eqtl = c("SNPID", "CHR", "POS", "PVAL", "BETA", "SE", "ProbeID","N","A1","A2") # We need N only if we estimate sdYest
     cols.biom = c("SNPID", "CHR", "POS", "PVAL", "BETA", "SE","N","type","A1","A2") # We need N only if we estimate sdYest
@@ -375,7 +375,7 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
     cols.eqtl = c("SNPID", "CHR", "POS", "PVAL", "ProbeID", "N","A1","A2")
     cols.biom = c("SNPID", "CHR", "POS", "PVAL", "N","A1","A2")
   }
-
+  
   if (cc) cols.biom = c(cols.biom, "Ncases")
   no_allele_merge =F
   if (!all(cols.eqtl %in% names(eqtl.df))){
@@ -385,12 +385,12 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
     }else{
       no_allele_merge = T
       cols.eqtl = cols.eqtl[-which(cols.eqtl %in% c("A1","A2"))]
-
+      
       message("Warning: allele columns missing, will sometimes merge SNPs with indels")
     }
   }
-
-
+  
+  
   if (!all(cols.biom %in% names(biom.df))){
     if(!all(cols.biom[-which(cols.biom %in% c("A1","A2"))] %in% names(biom.df))){
       print(all(c("A1","A2") %in% names(biom.df)))
@@ -401,8 +401,8 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
       message("Warning: allele columns missing, will sometimes merge SNPs with indels")
     }
   }
-
-
+  
+  
   ###
   # Filter by imputation quality if column exists
   info.columns <- grep( names(biom.df), pattern = 'info', value=TRUE)
@@ -413,12 +413,12 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
   if (length(info.columns) > 0)        {
     eqtl.df = subset(eqtl.df, eqtl.df[,info.columns] > rsq_filter)
   }
-
+  
   # use only one of the MAFs from the two datasets
   # First check if there is a MAF in eQTL data and use this, if not take the one in biom data
   # Filter by MAF
-
-
+  
+  
   if (maf.eqtl) {
     cols.eqtl = c(cols.eqtl, "MAF")
     maf.eqtl = TRUE
@@ -438,32 +438,32 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
     maf.biom= TRUE
     cols.biom = c(cols.biom, "F")
   }
-
+  
   if (!maf.eqtl & !maf.biom) stop("There is no MAF information in either dataset")
-
-
+  
+  
   ################## SNPID MATCHING
   # The reasoning here is that the user can give either only "SNPID", or "SNPID" and "input_names" (or we can find it as rsid or chr:pos and add it in the data as input_names)
   # if there is no "input_names" column and the SNPID is not already chr:pos format, then the software will find the chr:pos and see if it matches better with the eQTL data than the SNPID provided
-
-
+  
+  
   hasChr=ifelse(any(grep("chr",eqtl.df$CHR[1:2]))>0, TRUE,FALSE)
   if (hasChr) (eqtl.df$CHR=gsub("chr", "", eqtl.df$CHR))
   hasChr=ifelse(any(grep("chr",biom.df$CHR[1:2]))>0, TRUE,FALSE)
   if (hasChr) (biom.df$CHR=gsub("chr", "", biom.df$CHR))
-
-
+  
+  
   if (length(grep("^[0-9]{1,2}[:][1-9][0-9]*$", biom.df$SNPID))!=nrow(biom.df)) addChrposBiom = TRUE
   if (length(grep("^[0-9]{1,2}[:][1-9][0-9]*$", eqtl.df$SNPID))!=nrow(eqtl.df)) addChrposEQTL = TRUE
-
+  
   if (addChrposBiom) {
     biom.df$chrpos = paste(biom.df$CHR, biom.df$POS, sep=":")
   }
-
+  
   if (addChrposEQTL) {
     eqtl.df$chrpos = paste(eqtl.df$CHR, eqtl.df$POS, sep=":")
   }
-
+  
   if (!match_snpid) {
     # Find the combinations of SNPID that matches the most SNPs between the two datasets
     biomSNPID = unique(biom.df$SNPID)
@@ -471,24 +471,24 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
     match_snpid = max(length(biomSNPID[biomSNPID %in% eqtlSNPID]), length(eqtlSNPID[eqtlSNPID %in% biomSNPID]))
     match_chrpos_snpid = 0
     match_chrpos = 0
-
+    
     if (addChrposBiom) {
       biomchrpos = unique(biom.df$chrpos)
       match_chrpos_snpid = max(length(biomchrpos[biomchrpos %in% eqtlSNPID]), length(biomchrpos[biomchrpos %in% eqtlSNPID]))
     }
-
+    
     if (addChrposEQTL) {
       eqtlchrpos = unique(eqtl.df$chrpos)
       if (!addChrposBiom) {
         match_chrpos_snpid = max(length(eqtlchrpos[eqtlchrpos %in% biomSNPID]), length(eqtlchrpos[eqtlchrpos %in% biomSNPID]))
       }
     }
-
+    
     if (addChrposBiom & addChrposEQTL) match_chrpos = max(length(biomchrpos[biomchrpos %in% eqtlchrpos]), length(biomchrpos[biomchrpos %in% eqtlchrpos]))
-
-
+    
+    
     find_best_column = which.max(c(match_snpid, match_chrpos_snpid, match_chrpos))
-
+    
     if (find_best_column==1) message("Best combination is SNPID: do not change column names")
     if (find_best_column==2) {
       message("Best combination is SNPID in one dataset and input_name in the other: change one of the column names from input_name to SNPID")
@@ -505,7 +505,7 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
   }
   # if !match_snpid
   ####
-
+  
   biom.df = biom.df[,cols.biom]
   if("F" %in% names(biom.df)){
     colnames(biom.df)[which("F" == names(biom.df))] = "MAF.biom"
@@ -523,9 +523,9 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
   # Remove missing data
   eqtl.df = eqtl.df[complete.cases(eqtl.df),]
   biom.df = biom.df[complete.cases(biom.df),]
-
+  
   res.all <- data.frame()
-
+  
   ####
   # Find ProbeIDs overlapping with biom.df
   if(!is.null(bed_input_file)){
@@ -537,8 +537,8 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
     DT <- as.data.table(eqtl.df)
     expr_table <- DT[, list(CHR= unique(CHR), START = min(POS), STOP = max(POS), minP = min(PVAL)), by = ProbeID]
     expr_table <- data.frame(expr_table)
-    message("There are ", nrow(expr_table), " ProbeIDs in the eQTL data")
-
+    # message("There are ", nrow(expr_table), " ProbeIDs in the eQTL data")
+    
     decreaseGap = FALSE
     if (decreaseGap) {
       targetGap=100000
@@ -550,21 +550,21 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
     }
     bed = expr_table
   }
-
+  
   if (!all(c("ProbeID", "CHR", "START", "STOP") %in% names(bed))) stop("Bed file is missing info")
   bed$ProbeID = as.character(bed$ProbeID)
   bed$CHR=as.numeric(as.character(bed$CHR))
   bed$START=as.numeric(bed$START)
   bed$STOP=as.numeric(bed$STOP)
-  message("Looping through ", nrow(bed), " genes from the eQTL data")
-
+  # message("Looping through ", nrow(bed), " genes from the eQTL data")
+  
   ##################################################### now start the loop
   # Go over all regions that overlap between eQTL table and input.data
-
+  
   overlap.df<-merge(biom.df,eqtl.df,by="SNPID",suffixes=c(".biom",".eqtl"))
-
+  
   biom.df$sdY.biom = sdY.est((overlap.df$SE.biom)^2,overlap.df$MAF.eqtl,overlap.df$N.biom,overlap.df$BETA.biom)
-  message("Running in parallel")
+  # message("Running in parallel")
   registerDoParallel(cores=cores)
   list.probes = bed$ProbeID
   # print(class(eqtl.df))
@@ -579,7 +579,7 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
   }else{
     bed = NULL
   }
-
+  
   duplicated_snp_list = data.frame()
   res.all = data.frame()
   for(i in 1:length(list.probes)){
@@ -594,9 +594,9 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
     region.biom = remove_dupl(region.biom)[[1]]
     duplicated_snp_list = rbind(duplicated_snp_list, data.frame(ProbeID = ProbeID, data="eqtl",remove_dupl(region.eqtl)[[2]]))
     region.eqtl = remove_dupl(region.eqtl)[[1]]
-
+    
     # Loop over each biomarker
-
+    
     if (cc) {
       type= "cc"
       region.biom$s1 = region.biom$Ncases/region.biom$N
@@ -615,9 +615,9 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
       match_correct = toupper(merged.data$A1.biom) == toupper(merged.data$A1.eqtl) & toupper(merged.data$A2.biom)== toupper(merged.data$A2.eqtl)
       match_flip = toupper(merged.data$A1.biom) == toupper(merged.data$A2.eqtl) & toupper(merged.data$A2.biom) == toupper(merged.data$A1.eqtl)
       match_comp_one = toupper(merged.data$A1.biom) == complement_snp(toupper(merged.data$A1.eqtl)) & toupper(merged.data$A2.biom)== complement_snp(toupper(merged.data$A2.eqtl))
-
+      
       match_comp_two = toupper(merged.data$A1.biom) == complement_snp(toupper(merged.data$A2.eqtl)) & toupper(merged.data$A2.biom) == complement_snp(toupper(merged.data$A1.eqtl))
-
+      
       snp_allele_match = match_flip | match_correct | match_comp_one | match_comp_two
       # print(merged.data[!snp_allele_match,])
       # message(sum(snp_allele_match), " SNPs out of ", length(snp_allele_match), " had the correct alleles, discarding SNPs without the correct alleles")
@@ -654,7 +654,7 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
           merged.data$bed_region=NA
         }
         nsnps = nrow(merged.data)
-
+        
         if (!useBETA) {
           dataset.biom = list(snp = merged.data$SNPID, pvalues = merged.data$PVAL.biom,
                               N = merged.data$N.biom, s=merged.data$s1, type = type, MAF=merged.data$MAF.biom)
@@ -690,8 +690,8 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
         all.abf <- c(lH0.abf, lH1.abf, lH2.abf, lH3.abf, lH4.abf)
         message(unique(merged.data$bed_region))
         res.temp = data.frame(ProbeID = ProbeID, Chr = chrom, pos.start=pos.start, pos.end=pos.end, nsnps = nsnps, snp.biom=snp.biom, snp.eqtl=snp.eqtl, min.pval.biom=min.pval.biom, min.pval.eqtl=min.pval.eqtl, best.causal=best.causal, PP0.coloc.priors=pp0, PP1.coloc.priors=pp1, PP2.coloc.priors=pp2, PP3.coloc.priors = pp3, PP4.coloc.priors=pp4, lH0.abf=lH0.abf, lH1.abf=lH1.abf, lH2.abf=lH2.abf, lH3.abf=lH3.abf, lH4.abf=lH4.abf, plotFiles=NA, files=NA, bed_region=unique(merged.data$bed_region))
-
-
+        
+        
         res.out = rbind(res.out,res.temp)
         #res.all <- res.all[with(res.all, order(pp4, decreasing=T)),]
       }
@@ -704,7 +704,7 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
       res.all = rbind(res.all, res.out)
     }
   }
-
+  
   outfname = paste(outfolder, prefix, '_summary.tab', sep='')
   write.table(x =  res.all , file = outfname, row.names = FALSE, quote = FALSE, sep = '\t')
   res.all <- data.frame(res.all)
@@ -719,9 +719,9 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
   alphas = optim(c(2,-2,-2,-2), fn, data=lkl.frame, method = "Nelder-Mead", control=list(fnscale=-1))
   optim.alphas = exp(alphas$par)/ sum(exp(c(alphas$par,alphas$par[2] + alphas$par[3])))
   write(paste("Model with 4 parameters: ", prefix, ": ", paste(optim.alphas, collapse =" , "), sep=""), file = optim.res, append=TRUE)
-
+  
   lkl.frame = res.all[,c("lH0.abf", "lH1.abf", "lH2.abf", "lH3.abf", "lH4.abf")]
-
+  
   alphas = optim(c(2, -2, -2, -2, -2), fn.pw.gwas, data=lkl.frame, method = "Nelder-Mead", control=list(fnscale=-1))
   optim.alphas.mle= exp(alphas$par)/ sum(exp(alphas$par))
   if(bootstrap){
@@ -739,22 +739,22 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
     write.table(ml_estimates,file=bootstrap.summary, quote=F, row.names=F)
   }
   write(paste("Model with 5 parameters: ", prefix, ": ", paste(optim.alphas.mle, collapse =" , "), sep=""), file = optim.res, append=TRUE)
-
+  
   # compute posteriors using the already computed likelihoods per locus (lH1.abf etc) and the optimized parameters
-
+  
   new.coloc = apply(res.all[,c("lH0.abf", "lH1.abf", "lH2.abf", "lH3.abf", "lH4.abf")], 1, function(x) combine.abf.locus(x[1],x[2], x[3], x[4], x[5], a0 = optim.alphas.mle[1], a1 = optim.alphas.mle[2], a2 = optim.alphas.mle[3], a3 = optim.alphas.mle[4], a4 = optim.alphas.mle[5]))
   new.coloc=t(new.coloc)
-
+  
   res.all = cbind.data.frame(res.all, new.coloc)
-
+  
   write.table(x =  res.all , file = outfname, row.names = FALSE, quote = FALSE, sep = '\t')
-
+  
   # If Gene.name is missing, use ensemblID instead, then try to retrieve name from biomaRt.
   if (length(res.all$ProbeID[grep("ENSG", res.all$ProbeID)]) >0  & !("Gene.name" %in% names(res.all))) addGeneName = TRUE
   addGeneName= FALSE
   if (addGeneName) {
     res.all$Gene.name = res.all$ProbeID
-
+    
     biomart=FALSE
     if (biomart) {
       library(biomaRt)
@@ -775,7 +775,7 @@ coloc.eqtl.biom <- function(eqtl.df, biom.df, p12=1e-6, useBETA=TRUE, plot=FALSE
 
 
 sniff <- function(file=fname, eqtl = FALSE) {
-
+  
   # check if there is a header
   if (all(sapply(read.table(file, header = F, nrow = 1, stringsAsFactors=F), class)=="character")) header=TRUE else header=FALSE
   # Column called "F" interpreted as a logical, make sure this is not happening:
@@ -790,7 +790,7 @@ sniff <- function(file=fname, eqtl = FALSE) {
   # but ro compute Z need either pvalue and beta, or beta and SE so mucst import those too
   # Try to find correct columns to extract
   if (!header) stop("There is no header in the data")
-
+  
   line = read.table(file, header = T, nrow = 100, stringsAsFactors=F)
   if (ncol(line)==1) {
     separator=","
@@ -804,7 +804,7 @@ sniff <- function(file=fname, eqtl = FALSE) {
   if (is.na(F)) F=integer(0)
   PVAL = which(grepl("^p$|pval|Pvalue|P.value|P.val|BMIadjMainP|p-value", names(line),  ignore.case = T))[1]
   SE = which(grepl("^se|^StdErr$|BMIadjMainSE", names(line),  ignore.case = T))
-
+  
   if (length(PVAL)>0) {
     #Make sure this is not a heterogenous pvalue, if it is set to 0
     if (any(grepl("het", names(line)[PVAL], ignore.case =T))) {
@@ -816,7 +816,7 @@ sniff <- function(file=fname, eqtl = FALSE) {
       #print(names(line)[pval])
     }
   }
-  print(names(line))
+  # print(names(line))
   A1 = which(grepl("A1|Allele1|ref", names(line),ignore.case=T))
   A2 = which(grepl("A2|Allele2|alt", names(line),ignore.case=T))
   if(length(A1) ==0 || length(A2)== 0){
@@ -829,27 +829,27 @@ sniff <- function(file=fname, eqtl = FALSE) {
   # If there is no "chr" column see if I can extract it from the SNP name (only if all SNP names contain chr info)
   # if (length(chr)==0) & all(grepl("chr",line[,snp])) {
   #  message("Try to extract chr info from file") # sapply(strsplit(as.character(basename(files)), "_",fixed = TRUE), "[", 1)
-
+  
   # Necessary columns
   # if only chr, pos are missing could match with biomaRt to find rsid
   if (all(c(length(CHR), length(POS))==0) & length(SNPID)!=0) print("No chr, pos: must find from rsid")
   #if (any(c(length(snp), length(chr), length(pos), length(effect), length(pval))==0)) stop("Column names ", c("snp", "chr", "pos", "effect", "pval")[c(length(snp), length(chr), length(pos), length(effect), length(pval))==0], " not recognized")
   if (any(c(length(SNPID), length(PVAL))==0)) stop("Column names ", c("snp", "pval")[c(length(snp), length(pval))==0], " not recognized")
   if (any(c(length(SNPID), length(CHR), length(POS), length(BETA), length(SE), length(PVAL))>1)) stop("Some values match more than one column name: change complicated column names")
-
+  
   # If have a sample size for each SNP, output this
   N = which(grepl("^N$|^TotalSampleSize$|^SAMPLE_SIZE$", names(line),  ignore.case = T))
   Ncases =  which(grepl("^N_CASES$|^N_CASE$|^Ncases$", names(line),  ignore.case = T))
   Ncontrols =  which(grepl("^N_CONTROLS$|^N_CONTROL$|^Ncontrols$", names(line),  ignore.case = T))
-
+  
   info = which(grepl("INFO|RSQ", names(line),  ignore.case = T))
   Z = which(grepl("^Z$|zscore|t-stat", names(line),  ignore.case = T))
-
+  
   ### Sanity checks
   if (length(PVAL)>0) if ( sum(line[,PVAL] <0 | line[,PVAL]>1) >0 ) message("Invalid Pvalues")
   if (length(SE)>0) if ( sum(line[,SE] <=0 | line[,SE]=="Inf" | line[,SE]>10) >0 ) message("Invalid SE")
   if (length(info)>0) if ( sum(line[,info] <0 | line[,info]>1) >0 ) message("Imputation information is less than 0 or greater than 1")
-
+  
   print(line[1:2,])
   message("SNP column: ", names(line)[SNPID])
   message("CHR column: ", names(line)[CHR])
@@ -866,7 +866,7 @@ sniff <- function(file=fname, eqtl = FALSE) {
   message("A1 column: ", names(line)[A1])
   message("A2 column: ",names(line)[A2])
   if (eqtl) message("ProbeID column: ", names(line)[ProbeID])
-
+  
   output_cols = c(SNPID=SNPID, CHR=CHR, POS=POS, BETA=BETA, PVAL=PVAL, N=N, info=info, SE=SE, Z=Z, F=F, Ncases=Ncases, Ncontrols=Ncontrols,A1=A1,A2=A2)
   if (eqtl) output_cols = c(SNPID=SNPID, CHR=CHR, POS=POS, BETA=BETA, PVAL=PVAL, N=N, info=info, SE=SE, Z=Z, F=F, Ncases=Ncases, Ncontrols=Ncontrols, ProbeID=ProbeID,A1=A1,A2=A2)
   # Also output a list of the classes
@@ -878,7 +878,7 @@ sniff <- function(file=fname, eqtl = FALSE) {
   output_class = output_class[output_class!="NA"]
   # if integer make it numeric
   output_class[which(output_class=="integer")]=rep("numeric", length(which(output_class=="integer")))
-
+  
   output=list(output_cols, output_class)
   return(output)
 }
@@ -905,7 +905,7 @@ formatColoc <- function(fname = fname, type="cc", N=NA, Ncases=NA, info_filter=0
   if(type == "cc"){
     beta_idx = which(colnames(data) == "BETA")
   }
-
+  
   if (type=="quant") {
     if (!("N" %in% names(colsAll[[1]]))) {
       #if (is.na(N)) stop("Please specify a sample size because it is not found within the data")
@@ -927,13 +927,13 @@ formatColoc <- function(fname = fname, type="cc", N=NA, Ncases=NA, info_filter=0
       }
     }
   }
-
+  
   if (length(which(names(data)=="info"))>0 & info_filter!=0 & !is.na(info_filter)) {
     data = data[data$info > info_filter,]
   } else {
     message("Cannot find info so cannot filter")
   }
-
+  
   if (length(which(names(data)=="F"))>0 & maf_filter!=0 & !is.na(maf_filter)) {
     # could be either MAF or a frequency, but to filter find MAF
     data$F = as.numeric(as.character(data$F))
@@ -942,7 +942,7 @@ formatColoc <- function(fname = fname, type="cc", N=NA, Ncases=NA, info_filter=0
   } else {
     message("Cannot find frequency so cannot filter")
   }
-
+  
   # you need either effect and SE or pval for coloc
   if ( all(!(c("BETA", "SE") %in% names(data))) | !("PVAL" %in% names(data)) ) stop("Need either BETA and SE, or PVAL in the data")
   #outfile=paste(basename(fname), ".formatted.txt", sep="")
